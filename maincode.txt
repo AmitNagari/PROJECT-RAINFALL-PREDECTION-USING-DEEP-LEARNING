@@ -1,0 +1,87 @@
+# Import libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense, Conv1D, MaxPooling1D, Flatten, Dropout, LSTM, SimpleRNN
+
+# Load dataset
+df = pd.read_csv('C:/Users/tarun/Desktop/tarunproject/new.csv')
+
+# Define features and target variable
+X = df.iloc[:, 1:10].values
+y = df.iloc[:, -1].values
+
+# Split dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# Reshape data for CNNs
+X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+
+# Define models
+def cnn_model():
+    model = Sequential()
+    model.add(Conv1D(32, 2, activation='relu', input_shape=(9, 1)))
+    model.add(Conv1D(64, 2, activation='relu'))
+    model.add(MaxPooling1D(2))
+    model.add(Flatten())
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(1, activation='linear'))
+    return model
+
+def rnn_model():
+    model = Sequential()
+    model.add(SimpleRNN(32, input_shape=(9, 1)))
+    model.add(Dense(1, activation='linear'))
+    return model
+
+def lstm_model():
+    model = Sequential()
+    model.add(LSTM(32, input_shape=(9, 1)))
+    model.add(Dense(1, activation='linear'))
+    return model
+
+# Compile and fit models
+cnn = cnn_model()
+cnn.compile(loss='mean_squared_error', optimizer='adam')
+cnn.fit(X_train, y_train, epochs=50, batch_size=32, verbose=0)
+
+rnn = rnn_model()
+rnn.compile(loss='mean_squared_error', optimizer='adam')
+rnn.fit(X_train, y_train, epochs=50, batch_size=32, verbose=0)
+
+lstm = lstm_model()
+lstm.compile(loss='mean_squared_error', optimizer='adam')
+lstm.fit(X_train, y_train, epochs=50, batch_size=32, verbose=0)
+
+# Make predictions
+input_data = []
+print('Enter the following data:')
+latitude = float(input('Latitude: '))
+input_data.append(latitude)
+longitude = float(input('Longitude: '))
+input_data.append(longitude)
+temperature = float(input('Temperature: '))
+input_data.append(temperature)
+humidity = float(input('Humidity: '))
+input_data.append(humidity)
+wind_speed = float(input('Wind Speed: '))
+input_data.append(wind_speed)
+wind_direction = float(input('Wind Direction: '))
+input_data.append(wind_direction)
+pressure = float(input('Pressure: '))
+input_data.append(pressure)
+cloud_cover = float(input('Cloud Cover: '))
+input_data.append(cloud_cover)
+solar_radiation = float(input('Solar Radiation: '))
+input_data.append(solar_radiation)
+input_data = np.array(input_data).reshape((1, 9, 1))
+
+cnn_prediction = cnn.predict(input_data)[0][0]
+rnn_prediction = rnn.predict(input_data)[0][0]
+lstm_prediction = lstm.predict(input_data)[0][0]
+
+print('CNN Prediction:', cnn_prediction)
+print('RNN Prediction:', rnn_prediction)
+print('LSTM Prediction:', lstm_prediction)
